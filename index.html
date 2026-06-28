@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Tiny Week">
+  <title>Tiny Week</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      background: #F9F7F4;
+      color: #3B2A1A;
+      overflow: hidden;
+    }
+
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 12px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 12px);
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 4px 6px;
+      flex-shrink: 0;
+    }
+    .header-left { display: flex; align-items: baseline; gap: 10px; }
+    .app-title { font-size: 14px; font-weight: 600; color: #3B2A1A; letter-spacing: 0.02em; }
+    .week-label { font-size: 11px; color: #9C8D7E; }
+    .header-actions { display: flex; gap: 8px; }
+    .btn-icon {
+      background: none;
+      border: 0.5px solid #D4C9BA;
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 10px;
+      color: #6B5A48;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+    .btn-icon:active { background: #EDE8E0; }
+
+    /* Week nav */
+    #week-nav {
+      display: flex; align-items: center; justify-content: center;
+      gap: 20px;
+      padding: 0 4px 7px;
+      flex-shrink: 0;
+    }
+    .nav-btn {
+      background: none; border: 0.5px solid #D4C9BA; border-radius: 8px;
+      padding: 4px 12px; font-size: 12px; color: #6B5A48;
+      font-family: inherit; cursor: pointer;
+    }
+    .nav-btn:active { background: #EDE8E0; }
+    .nav-week-label { font-size: 11px; color: #9C8D7E; min-width: 130px; text-align: center; }
+
+    /* Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* Day column */
+    .day-col {
+      background: #FFFFFF;
+      border-radius: 12px;
+      border: 0.5px solid #E2DBD3;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
+    }
+    .day-col.today { border: 1.5px solid #3B2A1A; }
+    .day-col.has-void { background: #FDFBF8; }
+
+    /* Day header */
+    .day-header {
+      padding: 7px 4px 5px;
+      text-align: center;
+      border-bottom: 0.5px solid #EDE8E0;
+      flex-shrink: 0;
+    }
+    .day-name { font-size: 9px; font-weight: 500; color: #9C8D7E; letter-spacing: 0.06em; text-transform: uppercase; }
+    .day-date { font-size: 15px; font-weight: 500; color: #3B2A1A; line-height: 1.3; margin-top: 1px; }
+    .today-badge {
+      background: #3B2A1A; color: #FAF7F2;
+      border-radius: 50%;
+      width: 26px; height: 26px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 2px auto 0;
+      font-size: 13px; font-weight: 500;
+    }
+
+    /* Food section */
+    .food-section {
+      border-bottom: 0.5px solid #EDE8E0;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      height: 88px;
+      padding: 6px 4px;
+      transition: background 0.12s;
+    }
+    .food-section:active { background: #F5F1EB; }
+    .food-img {
+      width: 52px; height: 52px;
+      object-fit: contain;
+      display: block;
+    }
+    .food-name {
+      font-size: 9px; color: #6B5A48; font-weight: 500;
+      margin-top: 4px; line-height: 1.3; text-align: center;
+    }
+    .food-empty-label { font-size: 9px; color: #CCC4B8; text-align: center; line-height: 1.5; }
+
+    /* Void section */
+    .void-section {
+      border-bottom: 0.5px solid #EDE8E0;
+      padding: 6px 7px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 50px;
+    }
+    .section-label {
+      font-size: 8px; font-weight: 500; color: #9C8D7E;
+      letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 3px;
+    }
+    .void-time { font-size: 9px; color: #2C3E6B; font-weight: 500; line-height: 1.55; }
+    .void-none { font-size: 9px; color: #CCC4B8; }
+    .void-bar { height: 2px; border-radius: 2px; margin-top: 4px; }
+    .void-bar.active { background: #2C3E6B; }
+    .void-bar.inactive { background: #EDE8E0; }
+
+    /* Movie section */
+    .movie-section {
+      padding: 6px 7px 8px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      min-height: 44px;
+    }
+    .movie-input {
+      font-size: 9px; color: #2C3E6B; font-weight: 500;
+      background: none; border: none;
+      border-bottom: 0.5px solid #D4C9BA;
+      outline: none; width: 100%;
+      padding: 2px 0;
+      font-family: inherit;
+      cursor: text;
+      margin-top: 1px;
+    }
+    .movie-input::placeholder { color: #CCC4B8; font-weight: 400; }
+    .movie-input:focus { border-bottom-color: #2C3E6B; }
+
+    /* Overlay & panels */
+    .overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(40, 28, 18, 0.3);
+      z-index: 50; backdrop-filter: blur(2px);
+    }
+    .overlay.open { display: block; }
+
+    .panel {
+      display: none; position: fixed;
+      background: #FAF7F2;
+      border-radius: 20px 20px 0 0;
+      border-top: 0.5px solid #D4C9BA;
+      z-index: 51;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .panel.open { display: flex; }
+
+    .panel-handle {
+      width: 36px; height: 4px; background: #D4C9BA; border-radius: 2px;
+      margin: 10px auto 0; flex-shrink: 0;
+    }
+    .panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 18px 8px; flex-shrink: 0;
+    }
+    .panel-title { font-size: 13px; font-weight: 600; color: #3B2A1A; }
+    .panel-close {
+      background: none; border: none; font-size: 18px; color: #9C8870;
+      cursor: pointer; line-height: 1; padding: 0;
+    }
+
+    /* Meal panel */
+    #meal-panel { bottom: 0; left: 0; right: 0; max-height: 72vh; }
+    .meal-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      padding: 8px 14px 28px;
+      overflow-y: auto;
+    }
+    .meal-card {
+      background: #FFFFFF;
+      border: 0.5px solid #E2DBD3;
+      border-radius: 12px;
+      padding: 10px 6px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.12s, background 0.12s;
+    }
+    .meal-card:active { background: #F0EBE0; }
+    .meal-card.selected { border-color: #3B2A1A; border-width: 1.5px; }
+    .meal-card-img { width: 48px; height: 48px; object-fit: contain; display: block; margin: 0 auto; }
+    .meal-card-emoji { font-size: 32px; line-height: 1.1; display: block; }
+    .meal-card-name { font-size: 9px; color: #6B5A48; font-weight: 500; margin-top: 5px; line-height: 1.3; }
+    .random-card { background: #F9F7F4; }
+
+    /* Recipe panel */
+    #recipe-panel { bottom: 0; left: 0; right: 0; max-height: 60vh; }
+    .recipe-hint { font-size: 10px; color: #9C8D7E; padding: 0 18px 8px; flex-shrink: 0; }
+    .recipe-textarea {
+      flex: 1;
+      margin: 0 14px 24px;
+      padding: 10px 12px;
+      font-size: 12px; color: #3B2A1A; line-height: 1.7;
+      background: #FFFFFF; border: 0.5px solid #D4C9BA; border-radius: 10px;
+      font-family: inherit; resize: none; outline: none;
+      min-height: 120px;
+    }
+    .recipe-textarea:focus { border-color: #3B2A1A; }
+
+    /* iCal panel */
+    #ical-panel { bottom: 0; left: 0; right: 0; padding-bottom: 32px; }
+    .ical-body { padding: 8px 18px 0; }
+    .ical-desc { font-size: 12px; color: #6B5A48; line-height: 1.7; margin-bottom: 14px; }
+    .ical-upload-btn {
+      display: block; width: 100%;
+      background: #3B2A1A; color: #FAF7F2;
+      border: none; border-radius: 12px;
+      padding: 13px;
+      font-size: 13px; font-weight: 500;
+      font-family: inherit; cursor: pointer; text-align: center;
+      margin-bottom: 10px;
+    }
+    .ical-upload-btn:active { background: #2A1E10; }
+    .ical-status { font-size: 11px; color: #6B5A48; text-align: center; min-height: 18px; }
+    #ical-file-input { display: none; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <div class="header-left">
+      <span class="app-title">Tiny Week</span>
+      <span class="week-label" id="week-range-label"></span>
+    </div>
+    <div class="header-actions">
+      <button class="btn-icon" onclick="openIcalPanel()">🌙 Void Moon</button>
+      <button class="btn-icon" onclick="openMealPanel(null)">🍽 Meals</button>
+    </div>
+  </div>
+
+  <div id="week-nav">
+    <button class="nav-btn" onclick="changeWeek(-1)">◀</button>
+    <span class="nav-week-label" id="nav-label"></span>
+    <button class="nav-btn" onclick="changeWeek(1)">▶</button>
+  </div>
+
+  <div class="grid" id="grid"></div>
+</div>
+
+<!-- Overlay -->
+<div class="overlay" id="overlay" onclick="closeAllPanels()"></div>
+
+<!-- Meal select panel -->
+<div class="panel" id="meal-panel">
+  <div class="panel-handle"></div>
+  <div class="panel-header">
+    <span class="panel-title" id="meal-panel-title">Choose Meal</span>
+    <button class="panel-close" onclick="closeMealPanel()">✕</button>
+  </div>
+  <div class="meal-grid" id="meal-grid"></div>
+</div>
+
+<!-- Recipe panel -->
+<div class="panel" id="recipe-panel">
+  <div class="panel-handle"></div>
+  <div class="panel-header">
+    <span class="panel-title" id="recipe-panel-title">Recipe</span>
+    <button class="panel-close" onclick="closeRecipePanel()">✕</button>
+  </div>
+  <div class="recipe-hint">Notes & recipe for this meal</div>
+  <textarea class="recipe-textarea" id="recipe-textarea" placeholder="Add recipe notes..."></textarea>
+</div>
+
+<!-- iCal upload panel -->
+<div class="panel" id="ical-panel">
+  <div class="panel-handle"></div>
+  <div class="panel-header">
+    <span class="panel-title">Update Void Moon</span>
+    <button class="panel-close" onclick="closeIcalPanel()">✕</button>
+  </div>
+  <div class="ical-body">
+    <p class="ical-desc">Select the .ics file from the site.<br>Void moon times will update automatically.<br>Once a year is enough.</p>
+    <button class="ical-upload-btn" onclick="document.getElementById('ical-file-input').click()">
+      Select .ics file
+    </button>
+    <input type="file" id="ical-file-input" accept=".ics" onchange="loadIcal(this)">
+    <div class="ical-status" id="ical-status"></div>
+  </div>
+</div>
+
+<script>
+/* ── Constants ── */
+const KST_OFFSET = 9 * 60;
+const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+// Images folder: place PNG files in the same folder as index.html
+// e.g. beefstew.png, chickencurry.png, etc.
+const DEFAULT_MEALS = [
+  { id: 'beefstew',     name: 'Beef Stew',     img: 'beefstew.png',     recipe: '' },
+  { id: 'chickencurry', name: 'Chicken Curry',  img: 'chickencurry.png', recipe: '' },
+  { id: 'dakgalbi',     name: 'Dakgalbi',       img: 'dakgalbi.png',     recipe: '' },
+  { id: 'galbitang',    name: 'Galbitang',      img: 'galbitang.png',    recipe: '' },
+  { id: 'miyeokguk',    name: 'Miyeokguk',      img: 'miyeokguk.png',    recipe: '' },
+  { id: 'samgyeop',     name: 'Baechu Sukju',   img: 'samgyeop.png',     recipe: '' },
+  { id: 'tteokbokki',   name: 'Tteokbokki',     img: 'tteokbokki.png',   recipe: '' },
+  { id: 'tteokguk',     name: 'Tteokguk',       img: 'tteokguk.png',     recipe: '' },
+];
+const RANDOM_MEAL = { id: 'random', name: 'Random', img: 'random.png', recipe: '' };
+
+/* ── Storage ── */
+function load(key, def) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; } catch { return def; }
+}
+function save(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
+}
+
+/* ── State ── */
+let meals     = load('meals_v2', DEFAULT_MEALS);
+let voidData  = load('voidData', []);
+let weekData  = load('weekData', {});
+let weekOffset = 0;
+let activeDayKey = null;
+
+/* ── Date utils ── */
+function getKSTNow() {
+  const now = new Date();
+  return new Date(now.getTime() + KST_OFFSET * 60000);
+}
+function getMondayOfWeek(offset = 0) {
+  const kst = getKSTNow();
+  const day = kst.getUTCDay();
+  const diff = (day === 0 ? -6 : 1 - day);
+  const mon = new Date(kst);
+  mon.setUTCDate(kst.getUTCDate() + diff + offset * 7);
+  mon.setUTCHours(0, 0, 0, 0);
+  return mon;
+}
+function dateKey(d) { return d.toISOString().slice(0, 10); }
+function weekLabel(mon) {
+  const sun = new Date(mon); sun.setUTCDate(mon.getUTCDate() + 6);
+  const m1 = mon.getUTCMonth()+1, d1 = mon.getUTCDate();
+  const m2 = sun.getUTCMonth()+1, d2 = sun.getUTCDate();
+  const y = mon.getUTCFullYear();
+  if (m1 === m2) return `${y} · ${m1}/${d1} — ${d2}`;
+  return `${y} · ${m1}/${d1} — ${m2}/${d2}`;
+}
+
+/* ── Void utils ── */
+function getVoidForDay(dayKey) {
+  const dayStart = new Date(dayKey + 'T00:00:00+09:00').getTime();
+  const dayEnd   = dayStart + 24 * 3600 * 1000;
+  return voidData.filter(v => v.end > dayStart && v.start < dayEnd);
+}
+function formatVoidTime(v, dayKey) {
+  const dayStart = new Date(dayKey + 'T00:00:00+09:00').getTime();
+  const dayEnd   = dayStart + 24 * 3600 * 1000;
+  const fmt = (ms) => {
+    const d = new Date(ms + KST_OFFSET * 60000);
+    return `${String(d.getUTCHours()).padStart(2,'0')}:${String(d.getUTCMinutes()).padStart(2,'0')}`;
+  };
+  const startStr = v.start >= dayStart ? fmt(v.start) : `prev ${fmt(v.start)}`;
+  const endStr   = v.end   <= dayEnd   ? fmt(v.end)   : `+1 ${fmt(v.end)}`;
+  return `${startStr} — ${endStr}`;
+}
+
+/* ── iCal parser ── */
+function parseIcal(text) {
+  const events = [...text.matchAll(/BEGIN:VEVENT([\s\S]*?)END:VEVENT/g)];
+  const begins = [], ends = [];
+  for (const ev of events) {
+    const body = ev[1];
+    const sMatch = body.match(/SUMMARY:(.+)/);
+    const dtMatch = body.match(/DTSTART:(\S+)/);
+    if (!sMatch || !dtMatch) continue;
+    const summary = sMatch[1].trim();
+    const dtStr   = dtMatch[1].trim().replace(/\r/g,'');
+    let ms;
+    if (dtStr.endsWith('Z')) {
+      ms = Date.parse(dtStr.replace(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/,'$1-$2-$3T$4:$5:$6Z'));
+    } else {
+      const m = dtStr.match(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/);
+      if (m) ms = Date.parse(`${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]}+09:00`);
+    }
+    if (!ms || isNaN(ms)) continue;
+    if (summary.includes('begins')) begins.push(ms);
+    else if (summary.includes('ends')) ends.push(ms);
+  }
+  begins.sort((a,b)=>a-b); ends.sort((a,b)=>a-b);
+  const pairs = [];
+  for (const b of begins) {
+    const e = ends.find(en => en > b);
+    if (e) pairs.push({ start: b, end: e });
+  }
+  return pairs;
+}
+function loadIcal(input) {
+  const file = input.files[0]; if (!file) return;
+  const status = document.getElementById('ical-status');
+  status.textContent = 'Parsing...';
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const pairs = parseIcal(e.target.result);
+      voidData = pairs; save('voidData', voidData);
+      status.textContent = `✓ ${pairs.length} void periods loaded`;
+      renderGrid();
+    } catch { status.textContent = '⚠ Could not read file'; }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+/* ── Meal utils ── */
+function getMealById(id) {
+  if (id === 'random') return RANDOM_MEAL;
+  return meals.find(m => m.id === id) || null;
+}
+function mealImgHtml(meal, size = 52) {
+  return `<img class="food-img" style="width:${size}px;height:${size}px" src="${meal.img}" alt="${meal.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span style="display:none;font-size:${Math.round(size*0.7)}px">🍽</span>`;
+}
+function mealCardImgHtml(meal) {
+  return `<img class="meal-card-img" src="${meal.img}" alt="${meal.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span class="meal-card-emoji" style="display:none">🍽</span>`;
+}
+
+/* ── Grid render ── */
+function renderGrid() {
+  const mon = getMondayOfWeek(weekOffset);
+  const lbl = weekLabel(mon);
+  document.getElementById('week-range-label').textContent = lbl;
+  document.getElementById('nav-label').textContent = lbl;
+
+  const todayKey = dateKey(getKSTNow());
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(mon);
+    d.setUTCDate(mon.getUTCDate() + i);
+    const key = dateKey(d);
+    const dayName = DAY_NAMES[(i + 1) % 7];
+    const data = weekData[key] || {};
+    const meal = getMealById(data.mealId);
+    const voids = getVoidForDay(key);
+    const hasVoid = voids.length > 0;
+    const isToday = key === todayKey;
+
+    const col = document.createElement('div');
+    col.className = 'day-col' + (isToday ? ' today' : '') + (hasVoid ? ' has-void' : '');
+
+    // Header
+    const dateNum = d.getUTCDate();
+    const dateBadge = isToday
+      ? `<div class="today-badge">${dateNum}</div>`
+      : `<div class="day-date">${dateNum}</div>`;
+    col.innerHTML = `<div class="day-header"><div class="day-name">${dayName}</div>${dateBadge}</div>`;
+
+    // Food
+    const foodDiv = document.createElement('div');
+    foodDiv.className = 'food-section';
+    if (meal) {
+      if (meal.id === 'random') {
+        foodDiv.innerHTML = `${mealImgHtml(meal, 48)}<div class="food-name" style="color:#9C8870;">Random</div>`;
+        foodDiv.onclick = () => openMealPanel(key);
+      } else {
+        foodDiv.innerHTML = `${mealImgHtml(meal, 52)}<div class="food-name">${meal.name}</div>`;
+        foodDiv.onclick = () => openRecipePanel(key, meal);
+      }
+    } else {
+      foodDiv.innerHTML = `<div class="food-empty-label">Tap to<br>select</div>`;
+      foodDiv.onclick = () => openMealPanel(key);
+    }
+    col.appendChild(foodDiv);
+
+    // Void
+    const voidDiv = document.createElement('div');
+    voidDiv.className = 'void-section';
+    if (hasVoid) {
+      const lines = voids.map(v => formatVoidTime(v, key)).join('<br>');
+      voidDiv.innerHTML = `<div class="section-label">Void Moon</div><div class="void-time">${lines}</div><div class="void-bar active"></div>`;
+    } else {
+      voidDiv.innerHTML = `<div class="section-label">Void Moon</div><div class="void-none">—</div><div class="void-bar inactive"></div>`;
+    }
+    col.appendChild(voidDiv);
+
+    // Movie
+    const movieDiv = document.createElement('div');
+    movieDiv.className = 'movie-section';
+    const movieInput = document.createElement('input');
+    movieInput.className = 'movie-input';
+    movieInput.type = 'text';
+    movieInput.placeholder = 'time / title';
+    movieInput.value = data.movie || '';
+    movieInput.addEventListener('input', () => {
+      if (!weekData[key]) weekData[key] = {};
+      weekData[key].movie = movieInput.value;
+      save('weekData', weekData);
+    });
+    movieInput.addEventListener('click', e => e.stopPropagation());
+    movieDiv.innerHTML = `<div class="section-label">Cinema</div>`;
+    movieDiv.appendChild(movieInput);
+    col.appendChild(movieDiv);
+
+    grid.appendChild(col);
+  }
+}
+
+/* ── Panels ── */
+function openOverlay() { document.getElementById('overlay').classList.add('open'); }
+function closeAllPanels() {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('open'));
+  document.getElementById('overlay').classList.remove('open');
+  saveRecipeFromPanel();
+}
+
+// Meal panel
+function openMealPanel(dayKey) {
+  activeDayKey = dayKey;
+  const label = dayKey ? 'Choose Meal' : 'Meals';
+  document.getElementById('meal-panel-title').textContent = label;
+  const data = dayKey ? (weekData[dayKey] || {}) : {};
+  renderMealGrid(data.mealId);
+  document.getElementById('meal-panel').classList.add('open');
+  openOverlay();
+}
+function closeMealPanel() {
+  document.getElementById('meal-panel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+function renderMealGrid(selectedId) {
+  const grid = document.getElementById('meal-grid');
+  grid.innerHTML = '';
+  const allMeals = [...meals, RANDOM_MEAL];
+  for (const m of allMeals) {
+    const card = document.createElement('div');
+    card.className = 'meal-card' + (m.id === selectedId ? ' selected' : '') + (m.id === 'random' ? ' random-card' : '');
+    card.innerHTML = `${mealCardImgHtml(m)}<div class="meal-card-name">${m.name}</div>`;
+    if (activeDayKey) card.onclick = () => selectMeal(m.id);
+    grid.appendChild(card);
+  }
+}
+function selectMeal(mealId) {
+  if (!activeDayKey) return;
+  if (!weekData[activeDayKey]) weekData[activeDayKey] = {};
+  weekData[activeDayKey].mealId = mealId;
+  save('weekData', weekData);
+  closeMealPanel();
+  renderGrid();
+}
+
+// Recipe panel
+let activeRecipeMealId = null;
+function openRecipePanel(dayKey, meal) {
+  activeRecipeMealId = meal.id;
+  document.getElementById('recipe-panel-title').textContent = meal.name;
+  document.getElementById('recipe-textarea').value = meal.recipe || '';
+  document.getElementById('recipe-panel').classList.add('open');
+  openOverlay();
+}
+function closeRecipePanel() {
+  saveRecipeFromPanel();
+  document.getElementById('recipe-panel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+function saveRecipeFromPanel() {
+  if (!activeRecipeMealId) return;
+  const ta = document.getElementById('recipe-textarea');
+  const m = meals.find(x => x.id === activeRecipeMealId);
+  if (m) { m.recipe = ta.value; save('meals_v2', meals); }
+}
+
+// iCal panel
+function openIcalPanel() {
+  document.getElementById('ical-status').textContent = '';
+  document.getElementById('ical-panel').classList.add('open');
+  openOverlay();
+}
+function closeIcalPanel() {
+  document.getElementById('ical-panel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+
+// Week nav
+function changeWeek(dir) { weekOffset += dir; renderGrid(); }
+
+/* ── Init ── */
+renderGrid();
+</script>
+</body>
+</html>
