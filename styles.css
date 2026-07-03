@@ -10,7 +10,7 @@
 
   /* 주간 화면 고정 높이 */
   --date-row-height: 31px;
-  --meal-row-height: 190px;
+  --meal-row-height: 120px;
   --void-row-height: 28px;
   --movie-row-height: 58px;
 }
