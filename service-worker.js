@@ -1,4 +1,4 @@
-const CACHE_NAME = "tiny-week-v4";
+﻿const CACHE_NAME = "tiny-week-v6";
 const STATIC_FILES = [
   "./",
   "./index.html",
@@ -55,3 +55,5 @@ self.addEventListener("fetch", (event) => {
     })
   );
 });
+
+

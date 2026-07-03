@@ -1,16 +1,15 @@
-:root {
+﻿:root {
   --light-beige: #f4f3ee;
   --navy: #2c3e6b;
   --dark-brown: #5c3d2e;
   --today: #e7eaf0;
   --line: rgba(92, 61, 46, 0.22);
   --surface: rgba(255, 255, 255, 0.24);
-  --void: rgba(44, 62, 107, 0.15);
   --void-strong: rgba(44, 62, 107, 0.21);
 
-  /* 주간 화면 고정 높이 */
+  /* 二쇨컙 ?붾㈃ 怨좎젙 ?믪씠 */
   --date-row-height: 31px;
-  --meal-row-height: 120px;
+  --meal-row-height: clamp(82px, 24dvh, 104px);
   --void-row-height: 28px;
   --movie-row-height: 58px;
 }
@@ -43,7 +42,8 @@ button {
 
 .app-shell {
   width: 100%;
-  min-height: 100dvh;
+  height: 100dvh;
+  min-height: 0;
   padding:
     calc(8px + env(safe-area-inset-top))
     calc(10px + env(safe-area-inset-right))
@@ -119,9 +119,9 @@ button {
   font-size: 14px;
 }
 
-/* 내용 높이에 맞춰 고정하고 남은 화면 공간을 늘리지 않음 */
+/* ?댁슜 ?믪씠??留욎떠 怨좎젙?섍퀬 ?⑥? ?붾㈃ 怨듦컙???섎━吏 ?딆쓬 */
 .week-frame {
-  flex: 0 0 auto;
+  flex: 1 1 auto;
   min-height: 0;
   display: grid;
   border: 1px solid var(--line);
@@ -130,12 +130,13 @@ button {
 }
 
 .week-grid {
+  height: 100%;
   min-height: 0;
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
 }
 
-/* 이미지 유무와 관계없이 모든 날짜 열의 행 높이를 동일하게 고정 */
+/* ?대?吏 ?좊Т? 愿怨꾩뾾??紐⑤뱺 ?좎쭨 ?댁쓽 ???믪씠瑜??숈씪?섍쾶 怨좎젙 */
 .day-column {
   min-width: 0;
   display: grid;
@@ -143,7 +144,7 @@ button {
     var(--date-row-height)
     var(--meal-row-height)
     var(--void-row-height)
-    var(--movie-row-height);
+    minmax(var(--movie-row-height), 1fr);
   border-right: 1px solid var(--line);
   background: var(--surface);
 }
@@ -182,10 +183,10 @@ button {
   font-weight: 800;
 }
 
-/* 식단 영역 높이를 모든 날짜에서 동일하게 고정 */
+/* ?앸떒 ?곸뿭 ?믪씠瑜?紐⑤뱺 ?좎쭨?먯꽌 ?숈씪?섍쾶 怨좎젙 */
 .meal-cell {
   width: 100%;
-  height: var(--meal-row-height);
+  height: 100%;
   padding: 4px;
   border: 0;
   border-bottom: 1px solid var(--line);
@@ -218,7 +219,7 @@ button {
   line-height: 1;
 }
 
-/* 보이드문 영역도 고정 높이 유지 */
+/* 蹂댁씠?쒕Ц ?곸뿭??怨좎젙 ?믪씠 ?좎? */
 .void-cell {
   position: relative;
   width: 100%;
@@ -235,16 +236,6 @@ button {
   line-height: 1;
   white-space: nowrap;
   overflow: hidden;
-}
-
-.void-cell.is-active {
-  background: linear-gradient(
-    to bottom,
-    transparent 18%,
-    var(--void) 18%,
-    var(--void) 82%,
-    transparent 82%
-  );
 }
 
 .void-cell.is-active::before {
@@ -276,7 +267,7 @@ button {
 
 .movie-cell {
   width: 100%;
-  height: var(--movie-row-height);
+  height: 100%;
   padding: 5px 5px 4px;
   border: 0;
   background: transparent;
@@ -461,11 +452,11 @@ button {
   display: none;
 }
 
-/* 세로가 특히 짧은 가로 화면에서도 모든 날짜의 높이는 동일하게 유지 */
+/* ?몃줈媛 ?뱁엳 吏㏃? 媛濡??붾㈃?먯꽌??紐⑤뱺 ?좎쭨???믪씠???숈씪?섍쾶 ?좎? */
 @media (max-height: 360px) {
   :root {
     --date-row-height: 28px;
-    --meal-row-height: 160px;
+    --meal-row-height: clamp(72px, 25dvh, 90px);
     --void-row-height: 24px;
     --movie-row-height: 50px;
   }
@@ -539,3 +530,6 @@ button {
     font-size: 15px;
   }
 }
+
+
+

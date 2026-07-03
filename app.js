@@ -1,7 +1,7 @@
-const STORAGE_DAYS_KEY = "tiny-week:v1:days";
+﻿const STORAGE_DAYS_KEY = "tiny-week:v1:days";
 const STORAGE_WEEKS_KEY = "tiny-week:v1:initialized-weeks";
 const DAY_MS = 24 * 60 * 60 * 1000;
-const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const MEALS = [
   "beefstew",
@@ -112,12 +112,12 @@ function renderDayColumn(day, voidmoonItems) {
 
   const dateCell = document.createElement("div");
   dateCell.className = "date-cell";
-  dateCell.innerHTML = `<span class="day-name">${WEEKDAYS[day.getDay()]}</span><span class="day-date">${day.getMonth() + 1}.${day.getDate()}</span>`;
+  dateCell.innerHTML = `<span class="day-name">${WEEKDAYS[day.getDay()]}</span><span class="day-date">${day.getMonth() + 1}/${day.getDate()}</span>`;
 
   const mealCell = document.createElement("button");
   mealCell.className = "meal-cell";
   mealCell.type = "button";
-  mealCell.setAttribute("aria-label", `${formatLongDate(day)} 식단 선택`);
+  mealCell.setAttribute("aria-label", `${formatLongDate(day)} ?앸떒 ?좏깮`);
   mealCell.addEventListener("click", () => openMealModal(key, day));
 
   if (data.meal) {
@@ -140,7 +140,7 @@ function renderDayColumn(day, voidmoonItems) {
   const movieCell = document.createElement("button");
   movieCell.className = "movie-cell";
   movieCell.type = "button";
-  movieCell.setAttribute("aria-label", `${formatLongDate(day)} 영화 일정`);
+  movieCell.setAttribute("aria-label", `${formatLongDate(day)} ?곹솕 ?쇱젙`);
   movieCell.addEventListener("click", () => openMovieModal(key, day));
 
   if (data.movie) {
@@ -178,7 +178,7 @@ function renderMenuOptions() {
 
 function openMealModal(key, day) {
   state.selectedMealDate = key;
-  elements.mealModalTitle.textContent = `${formatShortDate(day)} 식단`;
+  elements.mealModalTitle.textContent = `${formatShortDate(day)} ?앸떒`;
   openModal(elements.mealModal);
 }
 
@@ -197,7 +197,7 @@ function selectMeal(meal) {
 function openMovieModal(key, day) {
   const movie = state.daysData[key]?.movie;
   state.selectedMovieDate = key;
-  elements.movieModalTitle.textContent = "영화";
+  elements.movieModalTitle.textContent = "?곹솕";
   elements.movieModalDate.textContent = formatLongDate(day);
   elements.movieTimeInput.value = movie?.time ?? "";
   elements.movieTitleInput.value = movie?.title ?? "";
@@ -340,15 +340,15 @@ function getVoidSegmentsForDay(day, items) {
       }
 
       if (startsToday && endsToday) {
-        return { label: `${formatTime(item.start)}–${formatTime(item.end)}`, position: "single" };
+        return { label: `${formatTime(item.start)}-${formatTime(item.end)}`, position: "single" };
       }
 
       if (startsBefore && endsToday) {
-        return { label: `→ ${formatTime(item.end)}`, position: "end" };
+        return { label: `until ${formatTime(item.end)}`, position: "end" };
       }
 
       if (startsToday && endsAfter) {
-        return { label: `${formatTime(item.start)} →`, position: "start" };
+        return { label: `${formatTime(item.start)}+`, position: "start" };
       }
 
       return { label: "ALL", position: "middle" };
@@ -409,15 +409,15 @@ function pad(value) {
 }
 
 function formatWeekRange(start, end) {
-  return `${start.getMonth() + 1}.${start.getDate()}–${end.getMonth() + 1}.${end.getDate()}`;
+  return `${start.getMonth() + 1}/${start.getDate()}-${end.getMonth() + 1}/${end.getDate()}`;
 }
 
 function formatShortDate(date) {
-  return `${date.getMonth() + 1}.${date.getDate()} ${WEEKDAYS[date.getDay()]}`;
+  return `${WEEKDAYS[date.getDay()]} ${date.getMonth() + 1}/${date.getDate()}`;
 }
 
 function formatLongDate(date) {
-  return `${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()} ${WEEKDAYS[date.getDay()]}`;
+  return `${date.getFullYear()} ${WEEKDAYS[date.getDay()]} ${date.getMonth() + 1}/${date.getDate()}`;
 }
 
 function formatTime(date) {
@@ -454,3 +454,6 @@ function registerServiceWorker() {
 
   navigator.serviceWorker.register("service-worker.js").catch(() => {});
 }
+
+
+
