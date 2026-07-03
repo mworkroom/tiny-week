@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#F4F3EE">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Tiny Week">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Tiny Week</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="orientation-lock" aria-live="polite">
+      <strong>Tiny Week</strong>
+      <span>가로 화면에서 사용해 주세요.</span>
+    </div>
+
+    <div class="app-shell">
+      <header class="app-header">
+        <div class="brand">
+          <h1>Tiny Week</h1>
+          <p>Seven days, already decided.</p>
+        </div>
+        <nav class="week-nav" aria-label="주간 이동">
+          <button class="nav-button" id="prevWeekButton" type="button" aria-label="이전 주">‹</button>
+          <button class="range-button" id="currentWeekButton" type="button" aria-label="현재 주로 이동">
+            <span id="weekRange"></span>
+          </button>
+          <button class="nav-button" id="nextWeekButton" type="button" aria-label="다음 주">›</button>
+        </nav>
+      </header>
+
+      <main class="week-frame" aria-label="주간 현황">
+        <div class="week-grid" id="weekGrid"></div>
+      </main>
+    </div>
+
+    <div class="modal-layer is-hidden" id="mealModal" role="dialog" aria-modal="true" aria-labelledby="mealModalTitle">
+      <div class="modal-panel meal-panel">
+        <div class="modal-header">
+          <h2 id="mealModalTitle">식단</h2>
+          <button class="icon-button" type="button" data-close-modal aria-label="닫기">×</button>
+        </div>
+        <div class="menu-grid" id="menuGrid"></div>
+      </div>
+    </div>
+
+    <div class="modal-layer is-hidden" id="movieModal" role="dialog" aria-modal="true" aria-labelledby="movieModalTitle">
+      <form class="modal-panel movie-panel" id="movieForm">
+        <div class="modal-header">
+          <h2 id="movieModalTitle">영화</h2>
+          <button class="icon-button" type="button" data-close-modal aria-label="닫기">×</button>
+        </div>
+        <p class="modal-date" id="movieModalDate"></p>
+        <label class="field">
+          <span>시간</span>
+          <input id="movieTimeInput" type="time" required>
+        </label>
+        <label class="field">
+          <span>제목</span>
+          <input id="movieTitleInput" type="text" maxlength="80" autocomplete="off" required>
+        </label>
+        <div class="modal-actions">
+          <button class="text-button danger-button" id="deleteMovieButton" type="button">삭제</button>
+          <button class="text-button primary-button" id="saveMovieButton" type="submit" disabled>저장</button>
+        </div>
+      </form>
+    </div>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
