@@ -7,6 +7,12 @@
   --surface: rgba(255, 255, 255, 0.24);
   --void: rgba(44, 62, 107, 0.15);
   --void-strong: rgba(44, 62, 107, 0.21);
+
+  /* 주간 화면 고정 높이 */
+  --date-row-height: 31px;
+  --meal-row-height: 190px;
+  --void-row-height: 28px;
+  --movie-row-height: 58px;
 }
 
 * {
@@ -113,8 +119,9 @@ button {
   font-size: 14px;
 }
 
+/* 내용 높이에 맞춰 고정하고 남은 화면 공간을 늘리지 않음 */
 .week-frame {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   min-height: 0;
   display: grid;
   border: 1px solid var(--line);
@@ -126,14 +133,17 @@ button {
   min-height: 0;
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  grid-template-rows: 1fr;
 }
 
+/* 이미지 유무와 관계없이 모든 날짜 열의 행 높이를 동일하게 고정 */
 .day-column {
   min-width: 0;
-  height: 100%;
   display: grid;
-  grid-template-rows: 31px auto 28px 58px;
+  grid-template-rows:
+    var(--date-row-height)
+    var(--meal-row-height)
+    var(--void-row-height)
+    var(--movie-row-height);
   border-right: 1px solid var(--line);
   background: var(--surface);
 }
@@ -147,6 +157,7 @@ button {
 .void-cell,
 .movie-cell {
   min-width: 0;
+  min-height: 0;
 }
 
 .date-cell {
@@ -171,10 +182,10 @@ button {
   font-weight: 800;
 }
 
+/* 식단 영역 높이를 모든 날짜에서 동일하게 고정 */
 .meal-cell {
   width: 100%;
-  aspect-ratio: 1 / 1;
-  height: auto;
+  height: var(--meal-row-height);
   padding: 4px;
   border: 0;
   border-bottom: 1px solid var(--line);
@@ -182,6 +193,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
   cursor: pointer;
 }
 
@@ -195,6 +207,7 @@ button {
 .empty-meal {
   width: 32px;
   height: 32px;
+  flex: 0 0 32px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -205,8 +218,13 @@ button {
   line-height: 1;
 }
 
+/* 보이드문 영역도 고정 높이 유지 */
 .void-cell {
   position: relative;
+  width: 100%;
+  height: var(--void-row-height);
+  min-height: var(--void-row-height);
+  max-height: var(--void-row-height);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -220,7 +238,13 @@ button {
 }
 
 .void-cell.is-active {
-  background: linear-gradient(to bottom, transparent 18%, var(--void) 18%, var(--void) 82%, transparent 82%);
+  background: linear-gradient(
+    to bottom,
+    transparent 18%,
+    var(--void) 18%,
+    var(--void) 82%,
+    transparent 82%
+  );
 }
 
 .void-cell.is-active::before {
@@ -252,7 +276,7 @@ button {
 
 .movie-cell {
   width: 100%;
-  height: 100%;
+  height: var(--movie-row-height);
   padding: 5px 5px 4px;
   border: 0;
   background: transparent;
@@ -261,6 +285,7 @@ button {
   align-items: stretch;
   justify-content: center;
   text-align: left;
+  overflow: hidden;
   cursor: pointer;
 }
 
@@ -436,7 +461,15 @@ button {
   display: none;
 }
 
+/* 세로가 특히 짧은 가로 화면에서도 모든 날짜의 높이는 동일하게 유지 */
 @media (max-height: 360px) {
+  :root {
+    --date-row-height: 28px;
+    --meal-row-height: 160px;
+    --void-row-height: 24px;
+    --movie-row-height: 50px;
+  }
+
   .app-shell {
     gap: 5px;
     padding:
@@ -452,10 +485,6 @@ button {
 
   .brand h1 {
     font-size: 18px;
-  }
-
-  .day-column {
-    grid-template-rows: 28px minmax(70px, 1fr) 24px 50px;
   }
 
   .movie-cell {
