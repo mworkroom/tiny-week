@@ -35,6 +35,7 @@ const state = {
   voidmoonByYear: new Map(),
   selectedMealDate: null,
   selectedMovieDate: null,
+  selectedMovieIndex: null,
 };
 
 const elements = {
@@ -137,23 +138,32 @@ function renderDayColumn(day, voidmoonItems) {
   voidCell.className = getVoidClassName(voidSegments);
   voidCell.textContent = voidSegments.map((segment) => segment.label).join(" / ");
 
-  const movieCell = document.createElement("button");
+  const movieCell = document.createElement("div");
   movieCell.className = "movie-cell";
-  movieCell.type = "button";
-  movieCell.setAttribute("aria-label", `${formatLongDate(day)} ?곹솕 ?쇱젙`);
-  movieCell.addEventListener("click", () => openMovieModal(key, day));
+  const movies = getMovies(data);
+  movieCell.append(...[0, 1].map((index) => renderMovieSlot(key, day, movies[index], index)));
 
-  if (data.movie) {
-    movieCell.innerHTML = `<span class="movie-time">${escapeHtml(data.movie.time)}</span><span class="movie-title">${escapeHtml(data.movie.title)}</span>`;
+  column.append(dateCell, mealCell, voidCell, movieCell);
+  return column;
+}
+
+function renderMovieSlot(key, day, movie, index) {
+  const slot = document.createElement("button");
+  slot.className = "movie-slot";
+  slot.type = "button";
+  slot.setAttribute("aria-label", `${formatLongDate(day)} 영화 ${index + 1}`);
+  slot.addEventListener("click", () => openMovieModal(key, day, index));
+
+  if (movie) {
+    slot.innerHTML = `<span class="movie-time">${escapeHtml(movie.time)}</span><span class="movie-title">${escapeHtml(movie.title)}</span>`;
   } else {
     const plus = document.createElement("span");
     plus.className = "movie-add-button";
     plus.textContent = "+";
-    movieCell.append(plus);
+    slot.append(plus);
   }
 
-  column.append(dateCell, mealCell, voidCell, movieCell);
-  return column;
+  return slot;
 }
 
 function renderMenuOptions() {
@@ -194,10 +204,11 @@ function selectMeal(meal) {
   render();
 }
 
-function openMovieModal(key, day) {
-  const movie = state.daysData[key]?.movie;
+function openMovieModal(key, day, index) {
+  const movie = getMovies(state.daysData[key] ?? {})[index];
   state.selectedMovieDate = key;
-  elements.movieModalTitle.textContent = "?곹솕";
+  state.selectedMovieIndex = index;
+  elements.movieModalTitle.textContent = `영화 ${index + 1}`;
   elements.movieModalDate.textContent = formatLongDate(day);
   elements.movieTimeInput.value = movie?.time ?? "";
   elements.movieTitleInput.value = movie?.title ?? "";
@@ -209,7 +220,7 @@ function openMovieModal(key, day) {
 
 function saveMovie(event) {
   event.preventDefault();
-  if (!state.selectedMovieDate) {
+  if (!state.selectedMovieDate || state.selectedMovieIndex === null) {
     return;
   }
 
@@ -220,23 +231,26 @@ function saveMovie(event) {
   }
 
   const current = state.daysData[state.selectedMovieDate] ?? {};
-  state.daysData[state.selectedMovieDate] = {
-    ...current,
-    movie: { time, title },
-  };
+  const movies = getMovies(current);
+  movies[state.selectedMovieIndex] = { time, title };
+  state.daysData[state.selectedMovieDate] = withMovies(current, movies);
   persistDays();
   closeModals();
   render();
 }
 
 function deleteMovie() {
-  if (!state.selectedMovieDate || !state.daysData[state.selectedMovieDate]?.movie) {
+  if (!state.selectedMovieDate || state.selectedMovieIndex === null) {
     return;
   }
 
-  const current = { ...state.daysData[state.selectedMovieDate] };
-  delete current.movie;
-  state.daysData[state.selectedMovieDate] = current;
+  const current = state.daysData[state.selectedMovieDate] ?? {};
+  const movies = getMovies(current);
+  if (!movies[state.selectedMovieIndex]) {
+    return;
+  }
+  movies[state.selectedMovieIndex] = null;
+  state.daysData[state.selectedMovieDate] = withMovies(current, movies);
   persistDays();
   closeModals();
   render();
@@ -253,8 +267,23 @@ function openModal(modal) {
 function closeModals() {
   state.selectedMealDate = null;
   state.selectedMovieDate = null;
+  state.selectedMovieIndex = null;
   elements.mealModal.classList.add("is-hidden");
   elements.movieModal.classList.add("is-hidden");
+}
+
+function getMovies(data) {
+  if (Array.isArray(data.movies)) {
+    return [data.movies[0] ?? null, data.movies[1] ?? null];
+  }
+
+  return [data.movie ?? null, null];
+}
+
+function withMovies(data, movies) {
+  const next = { ...data, movies };
+  delete next.movie;
+  return next;
 }
 
 function closeOnLayerClick(event) {
