@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = "tiny-week-v7";
+﻿const CACHE_NAME = "tiny-week-v8";
 const STATIC_FILES = [
   "./",
   "./index.html",
