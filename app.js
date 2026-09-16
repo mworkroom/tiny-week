@@ -1,5 +1,6 @@
 ﻿const STORAGE_DAYS_KEY = "tiny-week:v1:days";
 const STORAGE_WEEKS_KEY = "tiny-week:v1:initialized-weeks";
+const STORAGE_ROTATED_VIEW_KEY = "tiny-week:v1:rotated-landscape";
 const DAY_MS = 24 * 60 * 60 * 1000;
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -55,11 +56,14 @@ const elements = {
   movieTitleInput: document.querySelector("#movieTitleInput"),
   deleteMovieButton: document.querySelector("#deleteMovieButton"),
   saveMovieButton: document.querySelector("#saveMovieButton"),
+  enableRotatedViewButton: document.querySelector("#enableRotatedViewButton"),
+  disableRotatedViewButton: document.querySelector("#disableRotatedViewButton"),
 };
 
 document.addEventListener("DOMContentLoaded", init);
 
 function init() {
+  restoreRotatedViewPreference();
   renderMenuOptions();
   bindEvents();
   registerServiceWorker();
@@ -67,6 +71,8 @@ function init() {
 }
 
 function bindEvents() {
+  elements.enableRotatedViewButton.addEventListener("click", () => setRotatedView(true));
+  elements.disableRotatedViewButton.addEventListener("click", () => setRotatedView(false));
   elements.prevWeekButton.addEventListener("click", () => moveWeek(-1));
   elements.nextWeekButton.addEventListener("click", () => moveWeek(1));
   elements.currentWeekButton.addEventListener("click", () => {
@@ -90,6 +96,18 @@ function bindEvents() {
       closeModals();
     }
   });
+}
+
+function restoreRotatedViewPreference() {
+  setRotatedView(localStorage.getItem(STORAGE_ROTATED_VIEW_KEY) === "true", false);
+}
+
+function setRotatedView(enabled, persist = true) {
+  document.body.classList.toggle("is-portrait-rotated", enabled);
+
+  if (persist) {
+    localStorage.setItem(STORAGE_ROTATED_VIEW_KEY, String(enabled));
+  }
 }
 
 async function render() {

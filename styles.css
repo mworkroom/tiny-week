@@ -23,6 +23,11 @@ body {
   min-height: 100%;
 }
 
+.app-viewport {
+  width: 100%;
+  height: 100dvh;
+}
+
 body {
   margin: 0;
   overflow: hidden;
@@ -466,6 +471,10 @@ button {
   display: none;
 }
 
+.orientation-reset-button {
+  display: none;
+}
+
 /* 높이가 낮은 가로 화면에서도 모든 날짜의 행 높이를 동일하게 유지 */
 @media (max-height: 360px) {
   :root {
@@ -518,8 +527,7 @@ button {
     overflow: hidden;
   }
 
-  .app-shell,
-  .modal-layer {
+  .app-viewport {
     display: none;
   }
 
@@ -542,6 +550,57 @@ button {
   .orientation-lock span {
     color: var(--dark-brown);
     font-size: 15px;
+  }
+
+  .orientation-lock small {
+    max-width: 280px;
+    color: var(--dark-brown);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .orientation-button,
+  .orientation-reset-button {
+    min-height: 34px;
+    border: 1px solid var(--navy);
+    border-radius: 8px;
+    background: var(--navy);
+    color: var(--light-beige);
+    font-weight: 800;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .orientation-button {
+    margin-top: 8px;
+    padding: 0 18px;
+  }
+
+  body.is-portrait-rotated .orientation-lock {
+    display: none;
+  }
+
+  body.is-portrait-rotated .app-viewport {
+    position: fixed;
+    top: 0;
+    left: 100vw;
+    width: 100dvh;
+    height: 100dvw;
+    display: block;
+    transform: rotate(90deg);
+    transform-origin: top left;
+  }
+
+  body.is-portrait-rotated .app-shell {
+    height: 100%;
+  }
+
+  body.is-portrait-rotated .orientation-reset-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 9px;
+    font-size: 11px;
   }
 }
 
