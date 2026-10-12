@@ -136,7 +136,7 @@ function renderDayColumn(day, voidmoonItems) {
   const mealCell = document.createElement("button");
   mealCell.className = "meal-cell";
   mealCell.type = "button";
-  mealCell.setAttribute("aria-label", `${formatLongDate(day)} ?앸떒 ?좏깮`);
+  mealCell.setAttribute("aria-label", `${formatLongDate(day)} Select menu`);
   mealCell.addEventListener("click", () => openMealModal(key, day));
 
   if (data.meal) {
@@ -161,7 +161,24 @@ function renderDayColumn(day, voidmoonItems) {
   const movies = getMovies(data);
   movieCell.append(...[0, 1].map((index) => renderMovieSlot(key, day, movies[index], index)));
 
-  column.append(dateCell, mealCell, voidCell, movieCell);
+  const memoCell = document.createElement("textarea");
+  memoCell.className = "memo-cell";
+  memoCell.rows = 1;
+  memoCell.placeholder = "메모";
+  memoCell.setAttribute("aria-label", `${formatLongDate(day)} 메모`);
+  memoCell.value = data.memo ?? "";
+  memoCell.addEventListener("input", () => {
+    const current = { ...(state.daysData[key] ?? {}) };
+    if (memoCell.value) {
+      current.memo = memoCell.value;
+    } else {
+      delete current.memo;
+    }
+    state.daysData[key] = current;
+    persistDays();
+  });
+
+  column.append(dateCell, mealCell, voidCell, movieCell, memoCell);
   return column;
 }
 
@@ -206,7 +223,7 @@ function renderMenuOptions() {
 
 function openMealModal(key, day) {
   state.selectedMealDate = key;
-  elements.mealModalTitle.textContent = `${formatShortDate(day)} ?앸떒`;
+  elements.mealModalTitle.textContent = `${formatShortDate(day)} Menu`;
   openModal(elements.mealModal);
 }
 

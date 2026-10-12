@@ -12,6 +12,7 @@
   --meal-row-height: clamp(82px, 24dvh, 104px);
   --void-row-height: 28px;
   --movie-row-height: 58px;
+  --memo-row-height: 44px;
 }
 
 * {
@@ -37,7 +38,8 @@ body {
 }
 
 button,
-input {
+input,
+textarea {
   font: inherit;
 }
 
@@ -149,7 +151,8 @@ button {
     var(--date-row-height)
     var(--meal-row-height)
     var(--void-row-height)
-    minmax(var(--movie-row-height), 1fr);
+    minmax(var(--movie-row-height), 1fr)
+    var(--memo-row-height);
   border-right: 1px solid var(--line);
   background: var(--surface);
 }
@@ -330,6 +333,35 @@ button {
   text-overflow: ellipsis;
 }
 
+.memo-cell {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 8px 5px;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--navy);
+  font-size: 16px;
+  line-height: 1.4;
+  resize: none;
+  overflow: auto;
+}
+
+.memo-cell::placeholder {
+  color: var(--dark-brown);
+  opacity: 0.7;
+}
+
+.memo-cell:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: -2px;
+}
+
 .modal-layer {
   position: fixed;
   inset: 0;
@@ -482,6 +514,7 @@ button {
     --meal-row-height: clamp(72px, 25dvh, 90px);
     --void-row-height: 24px;
     --movie-row-height: 50px;
+    --memo-row-height: 36px;
   }
 
   .app-shell {
@@ -503,6 +536,10 @@ button {
 
   .movie-slot {
     padding: 2px 4px;
+  }
+
+  .memo-cell {
+    padding-block: 5px;
   }
 }
 
@@ -599,8 +636,10 @@ button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0 9px;
-    font-size: 11px;
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+    padding: 0;
   }
 }
 

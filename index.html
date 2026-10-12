@@ -33,7 +33,12 @@
             <span id="weekRange"></span>
           </button>
           <button class="nav-button" id="nextWeekButton" type="button" aria-label="다음 주">›</button>
-          <button class="orientation-reset-button" id="disableRotatedViewButton" type="button">회전 해제</button>
+          <button class="orientation-reset-button" id="disableRotatedViewButton" type="button" aria-label="Reset rotation" title="Reset rotation">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+              <path d="M3 11a9 9 0 1 1 2.7 7.7" />
+              <path d="M3 4v7h7" />
+            </svg>
+          </button>
         </nav>
       </header>
 
@@ -45,7 +50,7 @@
     <div class="modal-layer is-hidden" id="mealModal" role="dialog" aria-modal="true" aria-labelledby="mealModalTitle">
       <div class="modal-panel meal-panel">
         <div class="modal-header">
-          <h2 id="mealModalTitle">식단</h2>
+          <h2 id="mealModalTitle">Menu</h2>
           <button class="icon-button" type="button" data-close-modal aria-label="닫기">×</button>
         </div>
         <div class="menu-grid" id="menuGrid"></div>
