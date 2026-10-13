@@ -165,7 +165,6 @@ function renderDayColumn(day, voidmoonItems) {
   const memoCell = document.createElement("textarea");
   memoCell.className = "memo-cell";
   memoCell.rows = 1;
-  memoCell.placeholder = "메모";
   memoCell.setAttribute("aria-label", `${formatLongDate(day)} 메모`);
   memoCell.value = data.memo ?? "";
   memoCell.addEventListener("input", () => {
