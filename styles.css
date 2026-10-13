@@ -6,12 +6,17 @@
   --line: rgba(92, 61, 46, 0.22);
   --surface: rgba(255, 255, 255, 0.24);
   --void-strong: rgba(44, 62, 107, 0.21);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
 
   /* 주간 화면의 행별 고정 높이 */
   --date-row-height: 31px;
-  --meal-row-height: clamp(82px, 24dvh, 104px);
+  --meal-row-limit: calc(clamp(82px, 24dvh, 104px) - 8px);
+  --meal-row-height: var(--meal-row-limit);
   --void-row-height: 28px;
-  --movie-row-height: 58px;
+  --movie-row-height: 80px;
   --memo-row-height: 44px;
 }
 
@@ -52,10 +57,10 @@ button {
   height: 100dvh;
   min-height: 0;
   padding:
-    calc(8px + env(safe-area-inset-top))
-    calc(10px + env(safe-area-inset-right))
-    calc(8px + env(safe-area-inset-bottom))
-    calc(10px + env(safe-area-inset-left));
+    calc(8px + var(--safe-top))
+    calc(10px + var(--safe-right))
+    calc(8px + var(--safe-bottom))
+    calc(10px + var(--safe-left));
   display: flex;
   flex-direction: column;
   gap: 7px;
@@ -126,14 +131,15 @@ button {
   font-size: 14px;
 }
 
-/* 남은 화면 높이에 맞춰 프레임을 채우고 넘치는 내용은 숨김 */
+/* 실제 달력의 가용 너비와 높이를 기준으로 행을 배분한다. */
 .week-frame {
   flex: 1 1 auto;
   min-height: 0;
   display: grid;
   border: 1px solid var(--line);
   border-right: 0;
-  overflow: hidden;
+  container-type: size;
+  overflow: clip;
 }
 
 .week-grid {
@@ -141,11 +147,25 @@ button {
   min-height: 0;
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-rows: minmax(0, 1fr);
+}
+
+@supports (width: 1cqw) {
+  .week-grid {
+    /* 정사각형 이미지의 좌우 패딩은 유지하고 상하의 빈 공간을 제거한다.
+       공간이 부족하면 날짜·영화 두 칸·메모 높이를 먼저 확보한다. */
+    --meal-row-height: max(0px, min(
+      var(--meal-row-limit),
+      calc(100cqw / 7 - 8px),
+      calc(100cqh - var(--date-row-height) - var(--void-row-height) - var(--movie-row-height) - var(--memo-row-height))
+    ));
+  }
 }
 
 /* 이미지 유무와 관계없이 모든 날짜 열의 행 높이를 동일하게 유지 */
 .day-column {
   min-width: 0;
+  min-height: 0;
   display: grid;
   grid-template-rows:
     var(--date-row-height)
@@ -195,7 +215,7 @@ button {
 .meal-cell {
   width: 100%;
   height: 100%;
-  padding: 4px;
+  padding: 0 4px;
   border: 0;
   border-bottom: 1px solid var(--line);
   background: transparent;
@@ -362,15 +382,23 @@ button {
   outline-offset: -2px;
 }
 
+@media (pointer: coarse) {
+  /* iPhone의 작은 입력 글자에 대한 자동 확대를 줄이고 읽기 크기는 유지한다. */
+  .memo-cell:focus,
+  .field input {
+    font-size: 16px;
+  }
+}
+
 .modal-layer {
   position: fixed;
   inset: 0;
   z-index: 20;
   padding:
-    calc(16px + env(safe-area-inset-top))
-    calc(16px + env(safe-area-inset-right))
-    calc(16px + env(safe-area-inset-bottom))
-    calc(16px + env(safe-area-inset-left));
+    calc(16px + var(--safe-top))
+    calc(16px + var(--safe-right))
+    calc(16px + var(--safe-bottom))
+    calc(16px + var(--safe-left));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -511,19 +539,19 @@ button {
 @media (max-height: 360px) {
   :root {
     --date-row-height: 28px;
-    --meal-row-height: clamp(72px, 25dvh, 90px);
+    --meal-row-limit: calc(clamp(72px, 25dvh, 90px) - 8px);
     --void-row-height: 24px;
-    --movie-row-height: 50px;
+    --movie-row-height: 76px;
     --memo-row-height: 36px;
   }
 
   .app-shell {
     gap: 5px;
     padding:
-      calc(5px + env(safe-area-inset-top))
-      calc(8px + env(safe-area-inset-right))
-      calc(5px + env(safe-area-inset-bottom))
-      calc(8px + env(safe-area-inset-left));
+      calc(5px + var(--safe-top))
+      calc(8px + var(--safe-right))
+      calc(5px + var(--safe-bottom))
+      calc(8px + var(--safe-left));
   }
 
   .app-header {
@@ -620,7 +648,7 @@ button {
   body.is-portrait-rotated .app-viewport {
     position: fixed;
     top: 0;
-    left: 100vw;
+    left: 100dvw;
     width: 100dvh;
     height: 100dvw;
     display: block;
@@ -630,6 +658,20 @@ button {
 
   body.is-portrait-rotated .app-shell {
     height: 100%;
+    /* CSS 회전에 맞춰 물리적인 안전 여백의 방향도 회전시킨다. */
+    padding:
+      calc(8px + var(--safe-right))
+      calc(10px + var(--safe-bottom))
+      calc(8px + var(--safe-left))
+      calc(10px + var(--safe-top));
+  }
+
+  body.is-portrait-rotated .modal-layer {
+    padding:
+      calc(16px + var(--safe-right))
+      calc(16px + var(--safe-bottom))
+      calc(16px + var(--safe-left))
+      calc(16px + var(--safe-top));
   }
 
   body.is-portrait-rotated .orientation-reset-button {
