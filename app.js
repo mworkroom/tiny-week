@@ -30,7 +30,7 @@ const BUILT_IN_VOIDMOON = {
 };
 
 const state = {
-  currentWeekStart: startOfWeek(new Date()),
+  currentWeekStart: restoreWeekAfterUpdate(),
   daysData: readJson(STORAGE_DAYS_KEY, {}),
   initializedWeeks: readJson(STORAGE_WEEKS_KEY, {}),
   voidmoonByYear: new Map(),
@@ -61,6 +61,7 @@ const elements = {
 };
 
 document.addEventListener("DOMContentLoaded", init);
+let appUpdater = null;
 
 function init() {
   restoreRotatedViewPreference();
@@ -305,6 +306,7 @@ function closeModals() {
   state.selectedMovieIndex = null;
   elements.mealModal.classList.add("is-hidden");
   elements.movieModal.classList.add("is-hidden");
+  appUpdater?.applyPendingUpdate();
 }
 
 function getMovies(data) {
@@ -512,11 +514,29 @@ function escapeHtml(value) {
 }
 
 function registerServiceWorker() {
-  if (!("serviceWorker" in navigator)) {
-    return;
-  }
+  appUpdater = createAppUpdater({
+    version: TINY_WEEK_VERSION,
+    canReload: () =>
+      elements.mealModal.classList.contains("is-hidden") &&
+      elements.movieModal.classList.contains("is-hidden") &&
+      !document.activeElement?.matches("input, textarea"),
+    beforeReload: () => {
+      sessionStorage.setItem("tiny-week:update-week", dateKey(state.currentWeekStart));
+    },
+  });
+}
 
-  navigator.serviceWorker.register("service-worker.js").catch(() => {});
+function restoreWeekAfterUpdate() {
+  try {
+    const key = sessionStorage.getItem("tiny-week:update-week");
+    sessionStorage.removeItem("tiny-week:update-week");
+    if (key && /^\d{4}-\d{2}-\d{2}$/.test(key)) {
+      const [year, month, day] = key.split("-").map(Number);
+      const date = new Date(year, month - 1, day);
+      if (dateKey(date) === key) return startOfWeek(date);
+    }
+  } catch (_error) {}
+  return startOfWeek(new Date());
 }
 
 
